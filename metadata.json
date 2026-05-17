@@ -1,0 +1,8 @@
+{
+  "name": "4RABET Auth",
+  "description": "Premium login and registration interface with phone/email tabs and custom blue-themed inputs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
