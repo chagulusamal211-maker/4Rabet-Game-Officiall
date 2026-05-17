@@ -46,7 +46,7 @@ export default function App() {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       try {
-        await fetch('/api/notify', {
+        const response = await fetch('/api/notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -56,13 +56,20 @@ export default function App() {
         });
         
         setIsLoading(false);
-        setIsSuccess(true);
-        
-        // Reset success state after a few seconds
-        setTimeout(() => setIsSuccess(false), 3000);
+
+        if (response.ok) {
+          setIsSuccess(true);
+          // Reset success state after a few seconds
+          setTimeout(() => setIsSuccess(false), 3000);
+        } else {
+          const err = await response.json();
+          console.error('Server error:', err);
+          alert('Failed to send details. Error: ' + (err.error || 'Unknown'));
+        }
       } catch (error) {
         console.error('Notification failed:', error);
         setIsLoading(false);
+        alert('Network error. Please try again.');
       }
     }
   };

